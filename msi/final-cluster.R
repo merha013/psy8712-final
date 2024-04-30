@@ -5,10 +5,9 @@ library(caret)
 library(parallel) 
 library(doParallel)
 library(tictoc)
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Data Import and Cleaning
-data <- read_csv("../data/data.sav") # to pull data from the file
+data <- read_csv("../data/data.sav")  # to pull data from the file
 
 # Analysis
 holdout_indices <- createDataPartition(
