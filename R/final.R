@@ -374,7 +374,7 @@ holdout_model4 <- cor(predict(model4, test_tbl, na.action = na.pass),
 summary(resamples(list(model1, model2, model3, model4)), metric="Rsquared")
 dotplot(resamples(list(model1, model2, model3, model4)), metric="Rsquared")
 
-table1_tbl <- tibble(
+Table_1 <- tibble(
   algo = c("OLS Regression", 
            "Elastic Net", 
            "Random Forest", 
@@ -391,7 +391,7 @@ table1_tbl <- tibble(
     str_remove(formatC(holdout_model4, format = 'f', digits = 2), "^0"))
 )
 
-table2_tbl <- tibble(
+Table_2 <- tibble(
   algo = c("OLS Regression", 
            "Elastic Net", 
            "Random Forest", 
@@ -405,6 +405,10 @@ table2_tbl <- tibble(
                    as.numeric(abs(model3.par_time$tic-model3.par_time$toc)), 
                    as.numeric(abs(model4.par_time$tic-model4.par_time$toc)))
 )
+
+# Save Files
+write_csv(Table_1, "../out/table1.csv")
+write_csv(Table_2, "../out/table2.csv")
 
 ## The results show that using Random Forest without parallelizing is the most
 ## accurate and timely method to see how the other variables predict confidence
