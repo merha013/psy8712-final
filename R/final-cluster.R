@@ -8,7 +8,7 @@ library(tictoc)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Data Import and Cleaning
-data <- read_csv("../data/data.csv")
+data <- read_csv("../data/data.sav") # to pull data from the file
 
 # Analysis
 holdout_indices <- createDataPartition(

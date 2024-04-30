@@ -10,7 +10,10 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Data Import and Cleaning
 ## The document I downloaded from https://gss.norc.org/get-the-data/spss 
-## is too large to store on github. So, I'm commenting this out and only leaving the edited data file that I used for visualization and anlysis.
+## was the cumulative data set from 1972-2018. It was too large to store on 
+## github. So, I'm commenting this section (in which I imported and edited it) 
+## out and only leaving the final edited data file (that I used for 
+## visualization and anlysis) in the data folder.
 # gssALL_tbl <- read_sav("../data/GSS7218_R3.sav")
     ## read_sav is a specific version of read_spss for .sav files
 
@@ -44,9 +47,11 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 ## Save data file for easier access later
 # write_csv(data, file = "../data/data.sav")
+  ## write_csv is a reader function used to write .csv or .sav files
 
 ## Retrieve data file for use in analysis
-data <- read_csv("../data/data.csv")
+data <- read_csv("../data/data.sav")  
+  ## using read_csv because I used write_csv (even though its a .sav file)
 
 ## Calculate average confidence level in each institution by year
 average_confidence_yr <- data %>%  # select data and...
