@@ -53,7 +53,7 @@ model3 <- train(
   train_tbl,
   method="ranger",
   na.action = na.pass,
-  tuneLength = 10,
+  tuneLength = 1,
   preProcess = c("center","scale","zv","nzv","medianImpute"),
   trControl = trainControl(method="cv", 
                            number=10, 
@@ -68,7 +68,7 @@ model4 <- train(
   train_tbl,
   method="xgbLinear",
   na.action = na.pass,
-  tuneLength = 10, 
+  tuneLength = 2, 
   preProcess = c("center","scale","zv","nzv","medianImpute"),
   trControl = trainControl(method="cv", 
                            number=10, 
@@ -78,10 +78,9 @@ model4 <- train(
 model4_time <-  toc()
 
 ## PARALLELIZED
-local_cluster <- makeCluster(75) 
+local_cluster <- makeCluster(100) 
   ## amdsmall has 1 node with 128 cores per node
-  ## but 127 (128-1) seems like  a lot of cores to be using.
-  ## I also got a failed slurm job using 127 nodes. So, I'm trying 75.
+  ## I also got a failed slurm job using 127 nodes. So, I'm trying 100.
 registerDoParallel(local_cluster)
 
 tic()
@@ -118,7 +117,7 @@ model3.par <- train(
   train_tbl,
   method="ranger",
   na.action = na.pass,
-  tuneLength = 10,
+  tuneLength = 2,
   preProcess = c("center","scale","zv","nzv","medianImpute"),
   trControl = trainControl(method="cv", 
                            number=10, 
@@ -133,7 +132,7 @@ model4.par <- train(
   train_tbl,
   method="xgbLinear",
   na.action = na.pass,
-  tuneLength = 10,
+  tuneLength = 2,
   preProcess = c("center","scale","zv","nzv","medianImpute"),
   trControl = trainControl(method="cv", 
                            number=10, 
@@ -189,7 +188,7 @@ Table_4 <- tibble(
                 as.numeric(abs(model2_time$tic-model2_time$toc)), 
                 as.numeric(abs(model3_time$tic-model3_time$toc)), 
                 as.numeric(abs(model4_time$tic-model4_time$toc)))),
-  supercomputer_75 = c(as.numeric(abs(model1.par_time$tic-model1.par_time$toc)), 
+  supercomputer_100 = c(as.numeric(abs(model1.par_time$tic-model1.par_time$toc)), 
                    as.numeric(abs(model2.par_time$tic-model2.par_time$toc)), 
                    as.numeric(abs(model3.par_time$tic-model3.par_time$toc)), 
                    as.numeric(abs(model4.par_time$tic-model4.par_time$toc)))
