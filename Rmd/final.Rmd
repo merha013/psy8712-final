@@ -1,0 +1,83 @@
+---
+title: "PSY8712 Final Project"
+author: "Merhar"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true # to add a table of contents for easier reading
+    toc_float: true # so you can access the toc even when you scroll on the doc
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Reproducible Image and Online Resources
+
+An image of this project as of *`r format(Sys.Date(), "%d %B %Y")`* can be accessed by [clicking this link](https://mybinder.org/v2/gh/merha013/psy8712-week8/HEAD?urlpath=rstudio).
+
+An interactive web app is available by [clicking this link instead](https://merha013.shinyapps.io/week8/).
+
+## Script Settings and Resources
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+library(tidyverse)
+```
+
+## Data Import and Cleaning
+
+The following code uses a single pipeline to create week8_tbl from the data (week3.csv). It converts the timeEnd data into its correct type, relabels the variables for gender (to match code used in radio buttons for the shiny app), and reverses the code for q5. I also created two additional columns called 'average1' and 'average2' that provide the means of q1-q6 and q8-q10 respectively since it is needed in the Visualization section.
+
+```{r, message = FALSE, show_col_types=FALSE}
+week8_tbl <- read_csv("../data/week3.csv") %>%
+  mutate(timeEnd = ymd_hms(timeEnd),
+         # timeStart = ymd_hms(timeEnd), # even though you don't need this in the final calculation, you need to code it correctly or remove it entirely select(-timeStart)
+         gender = recode_factor(gender,
+                                M = "Male",
+                                F = "Female"),
+         q5 = max(q5)-q5+1, # better to not redefine variables over itself
+         average1 = (q1+q2+q3+q4+q5+q6)/6, # or use: rowMeans(across(q1:q6))
+         average2 = (q8+q9+q10)/3,
+         # could create a new column for true false of before July
+         beforeJuly = timeEnd>"2017-06-30 23:59:59")
+```
+
+## Visualization
+
+The table below shows the data contained in questions 1 through 6. It is paginated so the data will be less overwhelming and shows only ten rows at a time. Additionally, the scatterplot was created using the data from week8_tbl and placing the mean scores of questions 1-6 on the x-axis and the mean scores of questions 8-10 on the y-axis. A purple OLS regression line with a shaded error band is included in the depiction, and the input code to create this scatterplot has been hidden from the final output.
+
+```{r, echo=FALSE, message=FALSE}
+week8_tbl %>%
+  select(q1:q6)
+
+week8_tbl %>%
+  ggplot(aes(x=average1, y=average2)) +
+  geom_point() +
+  geom_smooth(method="lm", color="purple") +
+  labs(title = "Scatterplot of Mean Scores",
+       x = "Mean Scores of Q1-Q6",
+       y = "Mean Scores of Q8-Q10")
+```
+
+## Analysis
+
+```{r, echo=FALSE, message = FALSE}
+(analysis <- cor.test(week8_tbl$average1, week8_tbl$average2))
+correlation <- str_remove(round(analysis$estimate, digits=2), "^0")
+# another way to formate correlation
+str_remove(formatC(analysis$estimate, digits=2), "^0")
+```
+
+I observed a correlation of `r correlation` and a p-value of `r analysis$p.value`. This p-value means, using an $\alpha$=0.05, there is at least a `r format(analysis$p.value*100)`% probability of observing the collected data if there were truly no relationship between the mean of questions 1-6 and the mean of questions 8-10. Since `r analysis$p.value` \> $\alpha$, we fail to reject the null hypothesis that the true correlation is equal to 0. There is not enough evidence to conclude that there is a statistically significant relationship between the variables being tested at the 0.05 significance level.
+
+## Data Export
+
+A minimal/skinny version of the dataset appropriate for shiny has been created via a single series of pipes and exported.
+
+```{r}
+week8_tbl %>%
+  select(timeEnd, gender, average1, average2) %>% # could use beforeJuly instead of timeEnd
+  saveRDS("../shiny/week8/skinny.rds")
+```

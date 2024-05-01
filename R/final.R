@@ -152,12 +152,6 @@ average_confidence_yr %>%
 ### those who trust Medicine or the Scientific Community also tend to trust
 ### the Military. Let's look at correlations to learn more.
 
-## Calculate correlations between Military other institutions
-cleaned_data <- na.omit(data)
-cor(cleaned_data)
-### All correlations with Military are low (less than 0.26) but statistically 
-### significant due to the extremely large sample size.
-
 ## Provide an overview of any difference in confidence in the military by year
 average_confidence_yr %>%
   filter(Category == "Military") %>%
@@ -207,6 +201,16 @@ average_confidence_ed %>%
 ### This shows that confidence in the military has a slight decrease with more 
 ### years of education.
 
+## Calculate correlations between Military and demographics
+cleaned_data <- data %>%
+  na.omit() %>%
+  select(YEAR, AGE, EDUC, SEX, WRKSTAT, INCOME, Military)
+correlation <- cor(cleaned_data)
+correlation_df <- as.data.frame(correlation)
+View(correlation_df)
+### All correlations with Military are low (less than 0.15) but statistically 
+### significant due to the extremely large sample size.
+
 
 # Analysis
 ## Calculate how the other variables (year, age, gender, education, workstatus,
@@ -234,7 +238,7 @@ model1 <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model1_time <-  toc() # 5.58 sec elapsed
+model1_time <-  toc() # 8.08 sec elapsed
 
 tic()
 set.seed(8712)
@@ -249,7 +253,7 @@ model2 <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model2_time <-  toc() # 16.24 sec elapsed
+model2_time <-  toc() # 16.97 sec elapsed
 
 tic()
 set.seed(8712)
@@ -264,7 +268,7 @@ model3 <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model3_time <-  toc() # 359.32 sec elapsed
+model3_time <-  toc() # 324.61 sec elapsed
 
 tic()
 set.seed(8712)
@@ -279,7 +283,7 @@ model4 <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model4_time <-  toc() # 520.62 sec elapsed
+model4_time <-  toc() # 453.53 sec elapsed
 
 ## PARALLELIZED
 local_cluster <- makeCluster(detectCores() - 1) 
@@ -299,7 +303,7 @@ model1.par <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model1.par_time <-  toc() # 11.68 sec elapsed
+model1.par_time <-  toc() # 7.17 sec elapsed
 
 tic()
 model2.par <- train(
@@ -313,7 +317,7 @@ model2.par <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model2.par_time <-  toc() # 5.8 sec elapsed
+model2.par_time <-  toc() # 5.48 sec elapsed
 
 tic()
 set.seed(8712)
@@ -328,7 +332,7 @@ model3.par <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model3.par_time <-  toc() # 422.03 sec elapsed
+model3.par_time <-  toc() # 385.53 sec elapsed
 
 tic()
 set.seed(8712)
@@ -343,7 +347,7 @@ model4.par <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model4.par_time <-  toc() # 299.3 sec elapsed
+model4.par_time <-  toc() # 224.64 sec elapsed
 
 stopCluster(local_cluster)
 registerDoSEQ()
@@ -406,12 +410,15 @@ Table_2 <- tibble(
                    as.numeric(abs(model4.par_time$tic-model4.par_time$toc)))
 )
 
-# Save Files
-write_csv(Table_1, "../out/table1.csv")
-write_csv(Table_2, "../out/table2.csv")
-
 ## The results show that using Random Forest without parallelizing is the most
 ## accurate and timely method to see how the other variables predict confidence
 ## in the military, but it is still not a good predictor overall. It did well
 ## on the training data but not so much on the holdout. The combination of
 ## variables utilized do not appear to help predict trust in the military.
+
+# Data Export
+write_csv(Table_1, "../out/table1.csv")  # Save Files
+write_csv(Table_2, "../out/table2.csv")  # Save Files
+
+average_confidence_yr %>%  # save this tbl to be used in a shiny app
+  saveRDS("../shiny/final/skinny.rds")
