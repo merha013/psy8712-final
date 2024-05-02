@@ -22,7 +22,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ### individuals level of confidence in the military. So, I only picked a few
 ### to focus on: Confidence in other industries along with the demographics
 ### of age, education, gender, work status, and income.
-# columns_to_keep <- c("YEAR", "AGE", "EDUC", "SEX", "WRKSTAT", "INCOME",
+# columns_to_keep <- c("YEAR", "AGE", "EDUC", "SEX",
                      # "CONFINAN", "CONBUS", "CONCLERG", "CONEDUC", 
                      # "CONFED", "CONLABOR", "CONPRESS", "CONMEDIC", 
                      # "CONJUDGE", "CONSCI", "CONLEGIS", "CONARMY")
@@ -32,7 +32,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # data <- data_ALL %>%
   # filter(!is.na(CONARMY)) %>% # removes 22,018 rows with N/A for CONARMY
   # mutate_all(as.numeric) %>% # so the data is usable
-  # mutate_at(vars(-YEAR, -EDUC, -SEX, -WRKSTAT, -INCOME), 
+  # mutate_at(vars(-YEAR, -EDUC, -SEX), # no need to mutate age since all > 3
             # ~ ifelse(. ==1, 3, ifelse(. ==3,1,.))) %>%
     ## this makes 3 = "a great deal", and 1 = "hardly any"
     ## which makes it easier to interpret higher numbers as better
@@ -228,16 +228,34 @@ average_confidence_sex %>%
 ### We'll look at a t-test in the analysis section to learn more.
 
 
-# Analysis
+# Analysis & Publication
+# I merged these two sections to keep each section together cleaner.
 
-## Calculate correlations between Military and demographics to see relationship
-cleaned_data <- data %>%
-  na.omit() %>%
-  select(YEAR, AGE, EDUC, SEX, WRKSTAT, INCOME, Military)
-correlation <- cor(cleaned_data)
-correlation_df <- as.data.frame(correlation)
-View(correlation_df)
-### All correlations with Military are low (less than 0.15) but statistically 
+## Calculate correlations between Military and demographics
+cleaned_data_demo <- data %>%  
+  na.omit() %>%  # remove NAs
+  select(YEAR, AGE, EDUC, SEX, Military) # only keep these variables
+correlation_d <- cor(cleaned_data_demo) # check their correlation
+correlation_demo <- data.frame(correlation_d) # make it a data frame
+View(correlation_demo) # View it
+### All correlations with Military are low (less than 0.16) but statistically 
+### significant due to the extremely large sample size. We'll look at this 
+### more with machine learning in another R file (machinelearning.R).
+
+## Calculate correlations between Military and other institutions
+cleaned_data_inst <- data %>%
+  na.omit() %>% # remove NAs
+  select("Banks", "Major Companies", "Organized Religion",
+         "Education", "Federal Government", "Organized Labor",
+         "Press", "Medicine", "Supreme Court", 
+         "Scientific Community", "Congress", Military)  # keep these variables
+correlation_i <- cor(cleaned_data_inst) # check their correlation
+correlation_inst <- data.frame(correlation_i) # make it a data frame
+Military <- correlation_inst[,12] # keep only the military column
+mil_col <- data.frame(Institutions = rownames(correlation_inst),
+                      Military = Military) # make a data frame and keep labels
+View(mil_col) # View it
+### All correlations with Military are less than 0.26 but statistically 
 ### significant due to the extremely large sample size. We'll look at this 
 ### more with machine learning in another R file (machinelearning.R).
 
@@ -254,7 +272,8 @@ summary(yr_model) # show results
 age_model <- lm(Military ~ AGE, data = data_df) # run a linear regression
 summary(age_model) # show results
 ### This supports rejecting the null hypothesis and concluding that there is a
-### statistically significant small positive change in an individual's level of ### confidence in the military with age. However, this only explains 
+### statistically significant small positive change in an individual's level 
+### of confidence in the military with age. However, this only explains 
 ### approximately 0.59% of the variation in military confidence.
 
 ## Compare confidence in the military by years of education
@@ -278,5 +297,5 @@ female_data <- data[data$SEX=="2", "Military"]
 
 # Data Export
 
-average_confidence_yr %>%  # save this tbl to be used in a shiny app
-  saveRDS(average_confidence_yr, "../shiny/final/skinny.rds")
+# Save this tbl to be used in a shiny app
+saveRDS(average_confidence_yr, "../shiny/final/skinny.rds")

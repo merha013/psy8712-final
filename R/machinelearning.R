@@ -40,7 +40,7 @@ model1 <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model1_time <-  toc() # 8.08 sec elapsed
+model1_time <-  toc() # 5.78 sec elapsed
 
 tic()
 set.seed(8712)
@@ -55,7 +55,7 @@ model2 <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model2_time <-  toc() # 16.97 sec elapsed
+model2_time <-  toc() # 14.53 sec elapsed
 
 tic()
 set.seed(8712)
@@ -70,7 +70,7 @@ model3 <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model3_time <-  toc() # 324.61 sec elapsed
+model3_time <-  toc() # 362.39 sec elapsed
 
 tic()
 set.seed(8712)
@@ -85,7 +85,7 @@ model4 <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model4_time <-  toc() # 453.53 sec elapsed
+model4_time <-  toc() # 509.86 sec elapsed
 
 ## PARALLELIZED
 local_cluster <- makeCluster(detectCores() - 1) 
@@ -105,7 +105,7 @@ model1.par <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model1.par_time <-  toc() # 7.17 sec elapsed
+model1.par_time <-  toc() # 10.87 sec elapsed
 
 tic()
 model2.par <- train(
@@ -119,7 +119,7 @@ model2.par <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model2.par_time <-  toc() # 5.48 sec elapsed
+model2.par_time <-  toc() # 5.14 sec elapsed
 
 tic()
 set.seed(8712)
@@ -134,7 +134,7 @@ model3.par <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model3.par_time <-  toc() # 385.53 sec elapsed
+model3.par_time <-  toc() # 420.69 sec elapsed
 
 tic()
 set.seed(8712)
@@ -149,7 +149,7 @@ model4.par <- train(
                            verboseIter=T, 
                            indexOut = train_folds)
 )
-model4.par_time <-  toc() # 224.64 sec elapsed
+model4.par_time <-  toc() # 229.56 sec elapsed
 
 stopCluster(local_cluster)
 registerDoSEQ()
@@ -182,7 +182,7 @@ summary(resamples(list(model1, model2, model3, model4)), metric="Rsquared")
 dotplot(resamples(list(model1, model2, model3, model4)), metric="Rsquared")
 
 Table_1 <- tibble(
-  algo = c("OLS Regression", 
+  algorithm_tested = c("OLS Regression", 
            "Elastic Net", 
            "Random Forest", 
            "eXtreme Gradient Boosting"),
@@ -199,7 +199,7 @@ Table_1 <- tibble(
 )
 
 Table_2 <- tibble(
-  algo = c("OLS Regression", 
+  algorithm_tested = c("OLS Regression", 
            "Elastic Net", 
            "Random Forest", 
            "eXtreme Gradient Boosting"),
@@ -214,7 +214,7 @@ Table_2 <- tibble(
 )
 
 ## The results show that using Random Forest without parallelizing is the most
-## accurate and timely method to see how the other variables predict confidence
+## accurate & timely method to see how the other variables predict confidence
 ## in the military, but it is still not a good predictor overall. It did well
 ## on the training data but not so much on the holdout. The combination of
 ## variables utilized do not appear to help predict trust in the military.
